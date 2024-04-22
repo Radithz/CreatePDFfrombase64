@@ -1,0 +1,88 @@
+static void POSGENERAR_PDFS(Args _args)
+{
+
+    System.IO.FileStream fileStream;
+    System.IO.FileInfo   fi_pdfDoc;
+    System.IO.FileStream fs;
+    System.Text.Encoding encoding;
+    System.Byte[]        byteArray;
+    ClrObject            fileMode;
+    ClrObject            fileAccess;
+    System.Exception clrException;
+
+
+
+
+    #File
+    #Aif
+
+    #define.ClrFileModeEnum                     ('System.IO.FileMode')
+    #define.ClrFileModeCreate                   ('Create')
+
+    #define.ClrFileAccessEnum                   ('System.IO.FileAccess')
+    #define.ClrFileAccessWrite                  ('Write')
+
+    #define.ClrFileStream                       ('System.IO.FileStream')
+    #define.ClrMemoryStream                     ('System.IO.MemoryStream')
+    #define.ClrStreamReader                     ('System.IO.StreamReader')
+    #define.ClrStreamWriter                     ('System.IO.StreamWriter')
+    Tablewithbase64document Tablewithbase64document;
+    Parameters Parameters = Parameters::find();
+    str _Invoice;
+    FilenameOpen _Filename;
+
+    ;
+
+    try
+    {
+        fileMode = CLRInterop::parseClrEnum(#ClrFileModeEnum, #ClrFileModeCreate);
+        fileAccess = CLRInterop::parseClrEnum(#ClrFileAccessEnum, #ClrFileAccessWrite);
+
+
+       WhiLe  select * from  Tablewithbase64document
+        {
+         _Invoice = Tablewithbase64document.numDoc;
+        if( _Invoice != "")
+        {
+        byteArray = System.Convert::FromBase64String(Tablewithbase64document.pdfbase64);
+        //System.Convert::
+        _Filename = Parameters.ExportFilePath+"//"+_Invoice+".pdf";
+        fileStream = new CLRObject(#ClrFileStream, _filename, fileMode, fileAccess);
+        //streamWriter = new CLRObject(#ClrStreamWriter, fileStream, encoding);
+
+        fileStream.Write(byteArray,0,byteArray.get_Length());
+        fileStream.Flush();
+
+        // Close resources.
+        fileStream.Close();
+
+
+    }
+        }
+
+    }
+
+    catch(Exception::CLRError)
+    {
+
+        if (CLRInterop::isNull(fileStream) == false)
+        {
+            fileStream.Close();
+        }
+
+        clrException = CLRInterop::getLastException();
+        if (CLRInterop::isNull(clrException) == false)
+        {
+            error(clrException.get_Message());
+
+            clrException = clrException.get_InnerException();
+            if (CLRInterop::isNull(clrException) == false)
+            {
+                error(clrException.get_Message());
+            }
+        }
+
+        throw Exception::Error;
+    }
+
+}
